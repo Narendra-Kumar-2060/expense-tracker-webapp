@@ -50,13 +50,16 @@ python app.py
 
 ## Project Structure
 
+```text
 expense-tracker-webapp/
-├── app.py # Flask backend with routes
+├── app.py              # Flask backend with routes
 ├── templates/
-│ ├── index.html # Main page (form + transactions table)
-│ └── summary.html # Summary dashboard
-├── expenses.db # SQLite database (auto-created)
-└── README.md # This file
+│   ├── index.html      # Main page (form + transactions table)
+│   └── summary.html    # Summary dashboard
+├── expenses.db         # SQLite database (auto-created)
+└── README.md           # This file
+```
+
 
 ## Database Schema
 
