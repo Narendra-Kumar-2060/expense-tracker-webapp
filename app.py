@@ -1,7 +1,7 @@
 import sqlite3
 from datetime import datetime
 
-from flask import Flask, redirect, render_template, request, url_for
+from flask import Flask, redirect, render_template, request
 
 
 def init_db():
@@ -36,8 +36,59 @@ def index():
     cur = con.cursor()
     cur.execute("SELECT * FROM expenses ORDER BY date DESC, time DESC")
     transactions = cur.fetchall()
+
+    cur.execute("SELECT SUM(amount) FROM expenses")
+    total_amount = cur.fetchone()[0] or 0
+
     con.close()
-    return render_template("index.html", transactions=transactions)
+    return render_template(
+        "index.html", transactions=transactions, total_amount=total_amount
+    )
+
+
+@app.route("/delete/<int:id>")
+def delete(id):
+    con = sqlite3.connect("expenses.db")
+    cur = con.cursor()
+    cur.execute("DELETE FROM expenses WHERE id = ?", (id,))
+    con.commit()
+    con.close()
+    return redirect("/")
+
+
+@app.route("/summary")
+def summary():
+    con = sqlite3.connect("expenses.db")
+    cur = con.cursor()
+
+    cur.execute("SELECT SUM(amount) FROM expenses WHERE expense_or_income = 'expense'")
+    total_expense = cur.fetchone()[0] or 0
+
+    cur.execute("SELECT SUM(amount) FROM expenses WHERE expense_or_income = 'income'")
+    total_income = cur.fetchone()[0] or 0
+
+    cur.execute(
+        "SELECT category, SUM(amount) FROM expenses WHERE expense_or_income = 'expense' GROUP BY category"
+    )
+    category_summary = cur.fetchall()
+
+    cur.execute(
+        "SELECT payment_method, SUM(amount) FROM expenses GROUP BY payment_method"
+    )
+    payment_summary = cur.fetchall()
+
+    con.close()
+
+    net = total_income - total_expense
+
+    return render_template(
+        "summary.html",
+        total_expense=total_expense,
+        total_income=total_income,
+        net=net,
+        category_summary=category_summary,
+        payment_summary=payment_summary,
+    )
 
 
 @app.route("/add", methods=["POST", "GET"])
@@ -49,7 +100,7 @@ def add():
         try:
             amount = float(request.form["amount"])
         except ValueError:
-            pass
+            return "Invalid amount. Please enter a number.", 400
         transaction_type = request.form["transaction_type"]
         transaction_category = request.form["transaction_category"]
         payment_method = request.form["payment_method"]
@@ -74,7 +125,7 @@ def add():
         con.commit()
         con.close()
 
-    return redirect(url_for("index"))
+    return redirect("/")
 
 
 if __name__ == "__main__":
