@@ -60,7 +60,6 @@ expense-tracker-webapp/
 └── README.md           # This file
 ```
 
-
 ## Database Schema
 
 | Column            | Type    | Description                        |
