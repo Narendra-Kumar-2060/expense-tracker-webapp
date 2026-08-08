@@ -47,6 +47,15 @@
         color: white;
         cursor: pointer;
       }
+      .link-button {
+        background: none;
+        border: none;
+        padding: 0;
+        color: #dc3545;
+        text-decoration: underline;
+        cursor: pointer;
+        font: inherit;
+      }
       table {
         background: white;
         border-radius: 8px;
@@ -141,16 +150,19 @@
           <td>{{ t[6] }}</td>
           <td>{{ t[5] }}</td>
           <td>
-            <a
-              href="/delete/{{ t[0] }}"
-              onclick="return confirm('Delete this transaction?');"
-              >Delete</a
+            <form
+              action="/delete/{{ t[0] }}"
+              method="POST"
+              style="display: inline"
+              onsubmit="return confirm('Delete this transaction?');"
             >
+              <button type="submit" class="link-button">Delete</button>
+            </form>
           </td>
         </tr>
         {% endfor %}
         <tr style="background-color: #f8f9fa; font-weight: bold">
-          <td colspan="2">Total</td>
+          <td colspan="2">Net Total</td>
           <td>₹{{ total_amount }}</td>
           <td colspan="5"></td>
         </tr>

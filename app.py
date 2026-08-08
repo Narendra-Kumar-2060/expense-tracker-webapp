@@ -1,3 +1,4 @@
+import os
 import sqlite3
 from datetime import datetime
 
@@ -37,16 +38,22 @@ def index():
     cur.execute("SELECT * FROM expenses ORDER BY date DESC, time DESC")
     transactions = cur.fetchall()
 
-    cur.execute("SELECT SUM(amount) FROM expenses")
-    total_amount = cur.fetchone()[0] or 0
+    # Sum expenses and income separately - summing both together as one
+    # "total" made the number meaningless (an equal expense and income
+    # would net to zero but showed as double the amount instead).
+    cur.execute("SELECT SUM(amount) FROM expenses WHERE expense_or_income = 'expense'")
+    total_expense = cur.fetchone()[0] or 0
+    cur.execute("SELECT SUM(amount) FROM expenses WHERE expense_or_income = 'income'")
+    total_income = cur.fetchone()[0] or 0
+    net_total = total_income - total_expense
 
     con.close()
     return render_template(
-        "index.html", transactions=transactions, total_amount=total_amount
+        "index.html", transactions=transactions, total_amount=net_total
     )
 
 
-@app.route("/delete/<int:id>")
+@app.route("/delete/<int:id>", methods=["POST"])
 def delete(id):
     con = sqlite3.connect("expenses.db")
     cur = con.cursor()
@@ -130,4 +137,9 @@ def add():
 
 if __name__ == "__main__":
     init_db()
-    app.run(debug=True)
+    # Debug mode enables an interactive in-browser code executor on any
+    # error page - only turn it on for local development, never when this
+    # is reachable from the network. Set FLASK_DEBUG=1 in your shell to
+    # enable it locally.
+    debug_mode = os.environ.get("FLASK_DEBUG") == "1"
+    app.run(debug=debug_mode)
