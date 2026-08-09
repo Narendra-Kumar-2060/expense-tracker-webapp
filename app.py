@@ -12,13 +12,13 @@ def init_db():
     create_table = """
     CREATE TABLE IF NOT EXISTS expenses (
         id INTEGER PRIMARY KEY,
-        date TEXT NOT NULL, 
+        date TEXT NOT NULL,
         time TEXT NOT NULL,
-        amount REAL NOT NULL,    
+        amount REAL NOT NULL,
         category TEXT NOT NULL,
         description TEXT,
         payment_method TEXT NOT NULL,
-        expense_or_income TEXT NOT NULL CHECK(expense_or_income IN ('expense', 'income'))          
+        expense_or_income TEXT NOT NULL CHECK(expense_or_income IN ('expense', 'income'))
     );
     """
 
